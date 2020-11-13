@@ -5,9 +5,28 @@ date: "11/12/2020"
 output: github_document
 ---
 
-```{r setup}
+```{r setup, include = FALSE}
 library(tidyverse)
 library(rvest)
+library(ggridges)
+library(patchwork)
+
+knitr::opts_chunk$set(
+  fig.width = 12,
+  fig.asp = .6,  
+  fig.height = 6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom")) 
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_color_viridis_d
+scale_colour_continuous = scale_color_viridis_c
 
 set.seed(1)
 ```
@@ -17,7 +36,7 @@ set.seed(1)
 Load the data
 
 ```{r}
-homicide_data = read_csv("data_homicide/homicide-data.csv")
+homicide_data = read_csv("homicide_data/homicide-data.csv")
 ```
 
 The raw data has information on homicides in 50 large US cities gathered by the *Washington Post* , including victims' information (name, race, age, sex), location where the homicide occured (city, state) and disposition (closed/open with or without arrest). 
@@ -68,6 +87,36 @@ Plot that shows the estimates and CIs for each city
 
 
 # Problem 2
+
+**Tidy dataframe containing data from all participants (subject ID, arm, observations over time)**
+
+```{r}
+# Import one dataset
+data_1 = read_csv("lda_data/con_01.csv")
+
+# Import all dataset
+data_df = 
+  tibble(
+    path = list.files("lda_data") 
+  ) %>% 
+  mutate(
+    path = str_c("lda_data/", path),
+    data = map(path, read_csv)
+  ) %>% 
+  unnest(data)
+
+# Tidy
+
+data_tidy =
+  data_df %>% 
+  separate(path, into = c("path", "subject_id"), sep = "/") %>% 
+  pivot_longer(week_1:week_8,
+               names_to = "week",
+               values_to = "observation"
+  )
+```
+
+**Make a spaghetti plot showing observations on each subject over time, and comment on differences between groups.**
 
 
 

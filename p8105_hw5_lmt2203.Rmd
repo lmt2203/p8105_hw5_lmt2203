@@ -166,32 +166,31 @@ sigma = 5
 mu = 0
 ```
 
-Generate 5000 datasets from x ~ Normal(mu, sigma).
-For each dataset, save μ̂  and the p-value arising from a test of H:μ=0 using α=0.05. Hint: to obtain the estimate and p-value, use broom::tidy to clean the output of t.test.
+Set μ = 0. Generate 5000 datasets from x ~ Normal[μ,σ]
 
 ```{r}
-function(samp_size, mu = 3, sigma = 4)  {
-  sim_data = 
-    tibble(
-      x = rnorm(n = samp_size, mean = mu, sd = sigma)
-    )
+set.seed(1)
+
+sim_ttest = function(samp_size = 30, mu = 0, sigma = 5) {
+  
+  sim_data = tibble(
+    x = rnorm(n = samp_size, mean = mu, sd = sigma),
+  )
+  
   sim_data %>% 
-    summarize(
-      mean = mean(x),
-      sd = sd(x)
-    )
+  t.test() %>% 
+    broom::tidy()
 }
+
+sim_ttest (30)
 ```
 
-
-Repeat the above for μ={1,2,3,4,5,6}, and complete the following:
-
-Make a plot showing the proportion of times the null was rejected (the power of the test) on the y axis and the true value of μ on the x axis. Describe the association between effect size and power.
-Make a plot showing the average estimate of μ̂  on the y axis and the true value of μ on the x axis. Make a second plot (or overlay on the first) the average estimate of μ̂  only in samples for which the null was rejected on the y axis and the true value of μ on the x axis. Is the sample average of μ̂  across tests for which the null is rejected approximately equal to the true value of μ? Why or why not?
+Repeat the above for μ={1,2,3,4,5,6}
 
 ```{r}
 mu_list = 
   list(
+    "mu = 0" = 0,
     "mu = 1" = 1,
     "mu = 2" = 2,
     "mu = 3" = 3,
@@ -199,5 +198,45 @@ mu_list =
     "mu = 5" = 5,
     "mu = 6" = 6
   )
+
+output = vector("list", length = 7)
+
+for(i in 1:7)  {
+  output[[i]] = rerun(50, sim_ttest(mu = mu_list[[i]]))  %>% 
+    bind_rows()
+}
+
+output
 ```
+
+Put everything in a df
+
+```{r}
+sim_results = 
+  tibble(
+  mu = c(0 : 6)
+) %>% 
+  mutate(
+    output = map(.x = mu, ~rerun(100, sim_ttest(mu = .x))),
+    results = map(output, bind_rows)
+    ) %>% 
+  select(results) %>% 
+  unnest(results)
+```
+
+
+## Plots
+
+Make a plot showing the proportion of times the null was rejected (the power of the test) on the y axis and the true value of μ on the x axis. Describe the association between effect size and power.
+
+```{r}
+
+```
+
+Make a plot showing the average estimate of μ̂  on the y axis and the true value of μ on the x axis. Make a second plot (or overlay on the first) the average estimate of μ̂  only in samples for which the null was rejected on the y axis and the true value of μ on the x axis.
+
+```{r}
+
+```
+
 

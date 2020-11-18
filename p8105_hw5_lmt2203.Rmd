@@ -146,6 +146,8 @@ lda_df =
     week = as.numeric(str_replace(week, "^week_", "")),
     arm = recode_factor(arm,"con" = "control", "exp" = "experiment")
     ) 
+
+lda_df
 ```
 
 ## Spaghetti plot
